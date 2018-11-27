@@ -61,74 +61,75 @@ const blogs = [
         __v: 0
     }  
 ]
-
-describe('total likes', () => {
-    test('when list has only one blog equals the likes of that', () => {
-        const result = listHelper.totalLikes(listWithOneBlog)
-        expect(result).toBe(5)
-    })
-    test('when list has multiple blogs equals the sum of likes', () => {
-        const result = listHelper.totalLikes(blogs)
-        expect(result).toBe(36)
-    })
-    test('when list is empty is zero', () => {
-        const result = listHelper.totalLikes([])
-        expect(result).toBe(0)
-    })
-})
-
-describe('favourite blog', () => {
-    test('when list is empty return null', () => {
-        const result = listHelper.favoriteBlog([])
-        expect(result).toEqual(null)
-    })
-    test('when list has only one object equals that object', () => {
-        const result = listHelper.favoriteBlog(listWithOneBlog)
-        expect(result).toEqual(listWithOneBlog[0])
-    })
-    test('is the blog object with most likes in a list of blogs', () => {
-        const result = listHelper.favoriteBlog(blogs)
-        expect(result).toEqual(blogs[2])
-    })
-})
-
-describe('most blogs', () => {
-    test('when list is empty return null', () => {
-        const result = listHelper.mostBlogs([])
-        expect(result).toEqual(null)
-    })
-    test('when list of blogs return the author with most blogs', () => {
-        const result = listHelper.mostBlogs(blogs)
-        expect(result).toEqual({
-            author: 'Robert C. Martin',
-            blogs: 3
+describe.skip('list helpers', () => {
+    describe('total likes', () => {
+        test('when list has only one blog equals the likes of that', () => {
+            const result = listHelper.totalLikes(listWithOneBlog)
+            expect(result).toBe(5)
+        })
+        test('when list has multiple blogs equals the sum of likes', () => {
+            const result = listHelper.totalLikes(blogs)
+            expect(result).toBe(36)
+        })
+        test('when list is empty is zero', () => {
+            const result = listHelper.totalLikes([])
+            expect(result).toBe(0)
         })
     })
-    test('when list has only one object equals that object', () => {
-        const result = listHelper.mostBlogs(listWithOneBlog)
-        expect(result).toEqual({
-            author: 'Edsger W. Dijkstra',
-            blogs: 1
+
+    describe('favourite blog', () => {
+        test('when list is empty return null', () => {
+            const result = listHelper.favoriteBlog([])
+            expect(result).toEqual(null)
+        })
+        test('when list has only one object equals that object', () => {
+            const result = listHelper.favoriteBlog(listWithOneBlog)
+            expect(result).toEqual(listWithOneBlog[0])
+        })
+        test('is the blog object with most likes in a list of blogs', () => {
+            const result = listHelper.favoriteBlog(blogs)
+            expect(result).toEqual(blogs[2])
         })
     })
-})
-describe('most likes', () => {
-    test('when list is empty return null', () => {
-        const result = listHelper.mostLikes([])
-        expect(result).toEqual(null)
-    })
-    test('when list of blogs return the author with most likes', () => {
-        const result = listHelper.mostLikes(blogs)
-        expect(result).toEqual({
-            author: 'Edsger W. Dijkstra',
-            likes: 17
+
+    describe('most blogs', () => {
+        test('when list is empty return null', () => {
+            const result = listHelper.mostBlogs([])
+            expect(result).toEqual(null)
+        })
+        test('when list of blogs return the author with most blogs', () => {
+            const result = listHelper.mostBlogs(blogs)
+            expect(result).toEqual({
+                author: 'Robert C. Martin',
+                blogs: 3
+            })
+        })
+        test('when list has only one object equals that object', () => {
+            const result = listHelper.mostBlogs(listWithOneBlog)
+            expect(result).toEqual({
+                author: 'Edsger W. Dijkstra',
+                blogs: 1
+            })
         })
     })
-    test('when list has only one object equals that object', () => {
-        const result = listHelper.mostLikes(listWithOneBlog)
-        expect(result).toEqual({
-            author: 'Edsger W. Dijkstra',
-            likes: 5
+    describe('most likes', () => {
+        test('when list is empty return null', () => {
+            const result = listHelper.mostLikes([])
+            expect(result).toEqual(null)
+        })
+        test('when list of blogs return the author with most likes', () => {
+            const result = listHelper.mostLikes(blogs)
+            expect(result).toEqual({
+                author: 'Edsger W. Dijkstra',
+                likes: 17
+            })
+        })
+        test('when list has only one object equals that object', () => {
+            const result = listHelper.mostLikes(listWithOneBlog)
+            expect(result).toEqual({
+                author: 'Edsger W. Dijkstra',
+                likes: 5
+            })
         })
     })
 })
