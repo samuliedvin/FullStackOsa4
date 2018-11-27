@@ -16,13 +16,13 @@ mongoose
 
 app.use(cors())
 app.use(bodyParser.json())
-app.use(middleware.logger)
 
 app.use('/api/blogs', blogsRouter)
 
+app.use(middleware.logger)
 app.use(middleware.error)
 
 const PORT = 3003
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 })
