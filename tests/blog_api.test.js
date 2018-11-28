@@ -2,97 +2,175 @@ const supertest = require('supertest')
 const { app, server } = require('../index')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const { format, initialBlogs, nonExistingId, blogsInDb } = require('./test_helper')
 
-const initialBlogs = [
-    {
-        _id: '5a422a851b54a676234d17f7',
-        title: 'React patterns',
-        author: 'Michael Chan',
-        url: 'https://reactpatterns.com/',
-        likes: 7,
-        __v: 0
-    },
-    {
-        _id: '5a422aa71b54a676234d17f8',
-        title: 'Go To Statement Considered Harmful',
-        author: 'Edsger W. Dijkstra',
-        url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-        likes: 5,
-        __v: 0
-    },
-    {
-        _id: '5a422b3a1b54a676234d17f9',
-        title: 'Canonical string reduction',
-        author: 'Edsger W. Dijkstra',
-        url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
-        likes: 12,
-        __v: 0
-    },
-    {
-        _id: '5a422b891b54a676234d17fa',
-        title: 'First class tests',
-        author: 'Robert C. Martin',
-        url: 'http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll',
-        likes: 10,
-        __v: 0
-    },
-    {
-        _id: '5a422ba71b54a676234d17fb',
-        title: 'TDD harms architecture',
-        author: 'Robert C. Martin',
-        url: 'http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html',
-        likes: 0,
-        __v: 0
-    },
-    {
-        _id: '5a422bc61b54a676234d17fc',
-        title: 'Type wars',
-        author: 'Robert C. Martin',
-        url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
-        likes: 2,
-        __v: 0
-    }  
-]
+describe('when there is initially some blogs saved', async () => {
+    beforeAll(async () => {
+        await Blog.remove({})
+        const blogObjects = initialBlogs.map(blog => new Blog(blog))
+        await Promise.all(blogObjects.map(blog => blog.save()))
+    })
 
-beforeAll(async () => {
-    await Blog.remove({})
-  
-    const blogObjects = initialBlogs.map(blog => new Blog(blog))
-    const promiseArray = blogObjects.map(blog => blog.save())
-    await Promise.all(promiseArray)
-})
+    test('blogs are returned as json by GET /api/blogs', async () => {
+        const blogsInDatabase = await blogsInDb()
 
-test('blogs are returned as json', async () => {
-    const response = await api
-        .get('/api/blogs')
-        .expect(200)
-        .expect('Content-Type', /application\/json/)
-    expect(response.body.length).toBe(initialBlogs.length)
-})
+        const response = await api
+            .get('/api/blogs')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
 
-test('a valid blog can be added', async () => {
+        expect(response.body.length).toBe(blogsInDatabase.length)
 
-    const newBlog = {
-        title: 'a valid blog post',
-        author: 'Samuli Virtanen',
-        url: 'www.samulivirtanen.fi',
-        likes: 0   
-    }
+        const returnedTitles = response.body.map(b => b.title)
+        blogsInDatabase.forEach(blog => {
+            expect(returnedTitles).toContain(blog.title)
+        })
+    })
 
-    await api
-        .post('/api/blogs')
-        .send(newBlog)
-        .expect(200)
-        .expect('Content-Type', /application\/json/)
+    describe('addition of a blog', async() => {
+        test('a valid blog can be added', async () => {
 
-    const response = await api
-        .get('/api/blogs')
+            const newBlog = {
+                title: 'a valid blog post',
+                author: 'Samuli Virtanen',
+                url: 'www.samulivirtanen.fi',
+                likes: 0   
+            }
     
-    const contents = response.body.map(r => r.title)
-    expect(response.body.length).toBe(initialBlogs.length + 1)
-    expect(contents).toContain('a valid blog post')    
-})
+            const blogsBefore = await blogsInDb()
+    
+            await api
+                .post('/api/blogs')
+                .send(newBlog)
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+        
+            const blogsAfter = await blogsInDb()
+            
+            expect(blogsAfter.length).toBe(blogsBefore.length + 1)
+            const titles = blogsAfter.map(r => r.title)
+            expect(titles).toContain('a valid blog post')    
+        })
+    
+        test('a blog with no likes gets initiated with 0 likes', async () => {
+            const newBlog = {
+                title: 'a valid blog post',
+                author: 'Samuli Virtanen',
+                url: 'www.samulivirtanen.fi',
+            }
 
-afterAll(() => {
-    server.close()
+            const blogsBefore = await blogsInDb()
+
+            await api
+                .post('/api/blogs')
+                .send(newBlog)
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+            
+            const blogsAfter = await blogsInDb()
+    
+            const likes = blogsAfter.map(r => r.likes)
+            expect(likes[blogsBefore.length]).toBe(0)   
+        })
+    
+        test('server should respond with code 400 if blog contains no title or url', async () => {
+            const noTitleOrUrl = {
+                author: 'Samuli Virtanen',
+                likes: 4
+            }
+            await api
+                .post('/api/blogs')
+                .send(noTitleOrUrl)
+                .expect(400)
+    
+            const noTitle = {
+                author: 'Samuli Virtanen',
+                url: 'www.fi',
+                likes: 4
+            }
+            await api
+                .post('/api/blogs')
+                .send(noTitle)
+                .expect(400)
+    
+            const noUrl = {
+                author: 'Samuli Virtanen',
+                title: 'blog',
+                likes: 4
+            }
+            await api
+                .post('/api/blogs')
+                .send(noUrl)
+                .expect(400)
+        })
+    })
+
+    describe('deletion of a blog', async () => {
+        let addedBlog
+
+        beforeAll(async () => {
+            addedBlog = new Blog({
+                title: 'poisto pyynnöllä HTTP DELETE',
+                author: 'Samuli Virtanen',
+                url: 'www.samulivirtanen.fi',
+                likes: 0   
+            })
+            await addedBlog.save()
+        })
+
+        test('DELETE /api/blogs/:id succeeds with proper statuscode', async () => {
+            const blogsBefore = await blogsInDb()
+
+            await api
+                .delete(`/api/blogs/${addedBlog._id}`)
+                .expect(204)
+
+            const blogsAfter = await blogsInDb()
+
+            const titles = blogsAfter.map(r => r.title)
+
+            expect(titles).not.toContain(addedBlog.title)
+            expect(blogsAfter.length).toBe(blogsBefore.length - 1)
+        })
+    })
+    describe('editing of a blog', () => {
+        
+        let addedBlog 
+
+        beforeAll(async () => {
+            addedBlog = new Blog({
+                title: 'muokkaus pyynnöllä HTTP PUT',
+                author: 'Samuli Virtanen',
+                url: 'www.samulivirtanen.fi',
+                likes: 0   
+            })
+            await addedBlog.save()
+        })
+
+        test('PUT /api/blogs/:id updates a blog', async () => {
+            const blogsBefore = await blogsInDb()
+    
+            let editedBlog = {
+                title: 'muokkaus pyynnöllä HTTP PUT',
+                author: 'Samuli Virtanen',
+                url: 'www.samulivirtanen.fi',
+                likes: 42   
+            }
+            await api
+                .put(`/api/blogs/${addedBlog._id}`)
+                .send(editedBlog)
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+
+            const blogsAfter = await blogsInDb()
+
+            expect(blogsAfter.length).toBe(blogsBefore.length)
+            expect(blogsAfter[blogsAfter.length-1].likes).toBe(42)
+        })
+    })
+
+    afterAll(() => {
+        server.close()
+    })
+
 })
