@@ -61,7 +61,7 @@ const blogs = [
         __v: 0
     }  
 ]
-describe.skip('list helpers', () => {
+describe('list helpers', () => {
     describe('total likes', () => {
         test('when list has only one blog equals the likes of that', () => {
             const result = listHelper.totalLikes(listWithOneBlog)
