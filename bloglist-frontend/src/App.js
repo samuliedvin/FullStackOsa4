@@ -3,6 +3,7 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+
 class App extends React.Component {
   constructor(props) {
     super(props)
@@ -11,7 +12,10 @@ class App extends React.Component {
       username: '',
       password: '',
       error: null,
-      user: null
+      user: null,
+      newTitle: '',
+      newUrl: '',
+      newAuthor: '',
     }
   }
 
@@ -23,10 +27,11 @@ class App extends React.Component {
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       this.setState({user})
+      blogService.setToken(user.token)
     }
   } 
 
-  handleLoginFieldChange = (event) => {
+  handleFieldChange = (event) => {
     this.setState({ [event.target.name]: event.target.value })
   }
 
@@ -39,6 +44,7 @@ class App extends React.Component {
       })
       window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       this.setState({ username: '', password: '', user})
+      blogService.setToken(user.token)
 
     } catch(exception) {
       this.setState({
@@ -50,34 +56,93 @@ class App extends React.Component {
     }
   }
 
-  logout = async (event) => {
+  logout = (event) => {
       event.preventDefault()
       window.localStorage.removeItem('loggedBlogappUser')
       this.setState({user: null})
   }
 
+  addBlog = (event) => {
+    event.preventDefault()
+    const blogObject = {
+      title: this.state.newTitle,
+      url: this.state.newUrl,
+      author: this.state.newAuthor
+    }
+
+    blogService
+      .create(blogObject)
+      .then(newBlog => {
+        this.setState({
+            blogs: this.state.blogs.concat(newBlog),
+            newTitle: '',
+            newUrl: '',
+            newAuthor: '',
+        })
+      })
+  }
+
+  
+  
+
   render() {
+    const blogForm = () => (
+        <div>
+              <form onSubmit={this.addBlog}>
+                  <div>
+                      title
+                      <input
+                          type="text"
+                          name="newTitle"
+                          value={this.state.newTitle}
+                          onChange={this.handleFieldChange}
+                      />
+                  </div>
+                  <div>
+                      author
+                      <input
+                          type="text"
+                          name="newAuthor"
+                          value={this.state.newAuthor}
+                          onChange={this.handleFieldChange}
+                      />
+                  </div>
+                  <div>
+                      url
+                      <input
+                          type="text"
+                          name="newUrl"
+                          value={this.state.newUrl}
+                          onChange={this.handleFieldChange}
+                      />
+                  </div>
+                  <button type="submit">save</button>
+              </form>
+        </div>
+    )
+
+
     if (this.state.user === null) {
       return (
         <div>
           <h2>Kirjaudu sovellukseen</h2>
           <form onSubmit={this.login}>
             <div>
-            käyttäjätunnus
+            username
             <input
               type="text"
               name="username"
               value={this.state.username}
-              onChange={this.handleLoginFieldChange}
+              onChange={this.handleFieldChange}
             />
             </div>
             <div>
-              salasana
+              password
             <input
               type="password"
               name="password"
               value={this.state.password}
-              onChange={this.handleLoginFieldChange}
+              onChange={this.handleFieldChange}
             />
             </div>
             <button type="submit">kirjaudu</button>
@@ -90,6 +155,7 @@ class App extends React.Component {
       <div>
         <p>{this.state.user.name} logged in</p>
         <button onClick={this.logout}>logout</button>
+        {blogForm()}
         <h2>blogs</h2>
         {this.state.blogs.map(blog =>
           <Blog key={blog._id} blog={blog} />
