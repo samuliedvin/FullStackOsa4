@@ -2,6 +2,7 @@ import React from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Notification from './components/Notification'
 
 
 class App extends React.Component {
@@ -48,11 +49,11 @@ class App extends React.Component {
 
     } catch(exception) {
       this.setState({
-        error: 'käyttäjätunnus tai salasana virheellinen',
+        error: 'wrong username or password',
       })
       setTimeout(() => {
         this.setState({ error: null })
-      }, 5000)
+      }, 2000)
     }
   }
 
@@ -74,11 +75,15 @@ class App extends React.Component {
       .create(blogObject)
       .then(newBlog => {
         this.setState({
+            error: `a new blog '${blogObject.title}' by ${blogObject.author} added`,
             blogs: this.state.blogs.concat(newBlog),
             newTitle: '',
             newUrl: '',
             newAuthor: '',
         })
+        setTimeout(() => {
+            this.setState({ error: null })
+        }, 2000)  
       })
   }
 
@@ -125,40 +130,42 @@ class App extends React.Component {
     if (this.state.user === null) {
       return (
         <div>
-          <h2>Kirjaudu sovellukseen</h2>
-          <form onSubmit={this.login}>
-            <div>
-            username
-            <input
-              type="text"
-              name="username"
-              value={this.state.username}
-              onChange={this.handleFieldChange}
-            />
-            </div>
-            <div>
-              password
-            <input
-              type="password"
-              name="password"
-              value={this.state.password}
-              onChange={this.handleFieldChange}
-            />
-            </div>
-            <button type="submit">kirjaudu</button>
-          </form>
+            <Notification message={this.state.error} />
+            <h2>Kirjaudu sovellukseen</h2>
+            <form onSubmit={this.login}>
+                <div>
+                username
+                    <input
+                    type="text"
+                    name="username"
+                    value={this.state.username}
+                    onChange={this.handleFieldChange}
+                    />
+                </div>
+                <div>
+                password
+                    <input
+                    type="password"
+                    name="password"
+                    value={this.state.password}
+                    onChange={this.handleFieldChange}
+                    />
+                </div>
+                <button type="submit">kirjaudu</button>
+            </form>
         </div>
       )
     }
   
     return (
       <div>
+        <Notification message={this.state.error} />
         <p>{this.state.user.name} logged in</p>
         <button onClick={this.logout}>logout</button>
         {blogForm()}
         <h2>blogs</h2>
         {this.state.blogs.map(blog =>
-          <Blog key={blog._id} blog={blog} />
+          <Blog key={blog.id} blog={blog} />
         )}
       </div>
     )

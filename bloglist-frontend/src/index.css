@@ -1,0 +1,23 @@
+h1 {
+    color: green;
+    font-style: italic;
+}
+  
+.blog {
+    color: #444444;
+    padding-top: 5px;
+    font-size: 15px;
+}
+
+.error {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    color: darkblue;
+    background: rgb(247, 214, 214);
+    font-size: 20px;
+    border-style: solid 0.5px;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
