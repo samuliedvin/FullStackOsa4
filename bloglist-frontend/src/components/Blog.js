@@ -1,12 +1,11 @@
 import React from 'react'
-import Togglable from './Togglable';
+import Togglable from './Togglable'
 
 class Blog extends React.Component {
     constructor(props) {
         super(props)
     }
 
-  
     handleClick = () => {
         this.blogInfo.toggleVisibility()
     }
@@ -19,7 +18,7 @@ class Blog extends React.Component {
                         <p>
                             <a href={this.props.blog.url}>{this.props.blog.url}</a>
                         </p>
-                        <p>{this.props.blog.likes} likes <button>like</button></p>
+                        <p>{this.props.blog.likes} likes <button onClick={this.props.addLike}>like</button></p>
                         <p>added by {!this.props.blog.user ? 'anonymous' : this.props.blog.user.name}</p>
                     </div>
                 </Togglable>

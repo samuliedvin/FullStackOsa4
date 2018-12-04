@@ -90,6 +90,30 @@ class App extends React.Component {
             })  
     }
 
+    addLike = (id) => {
+        return () => {
+            const blog = this.state.blogs.find(b => b.id === id)
+            const changedBlog = { ...blog, likes: blog.likes+1 }
+      
+            blogService
+              .update(id, changedBlog)
+              .then(changedBlog => {
+                this.setState({
+                  blogs: this.state.blogs.map(blog => blog.id !== id ? blog : changedBlog)
+                })
+              })
+              .catch(error => {
+                this.setState({
+                  error: `blog '${blog.title}' has been removed from the server`,
+                  blogs: this.state.blogs.filter(b => b.id !== id)
+                })
+                setTimeout(() => {
+                  this.setState({ error: null })
+                }, 50000)
+              })
+          }
+    }
+
   render() {
     if (this.state.user === null) {
         return (
@@ -122,7 +146,11 @@ class App extends React.Component {
         </Togglable>
         <h2>blogs</h2>
         {this.state.blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
+            <Blog 
+                key={blog.id} 
+                blog={blog} 
+                addLike={this.addLike(blog.id)}
+            />
         )}
       </div>
     )
