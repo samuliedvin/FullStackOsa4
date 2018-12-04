@@ -23,7 +23,8 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "jsonwebtoken": "^8.4.0",
-    "mongoose": "^5.3.13"
+    "mongoose": "^5.3.13",
+    "prop-types": "^15.6.2"
   },
   "jest": {
     "testEnvironment": "node"

@@ -1,9 +1,17 @@
 import React from 'react'
 import Togglable from './Togglable'
+import PropTypes from 'prop-types'
 
 class Blog extends React.Component {
     constructor(props) {
         super(props)
+    }
+
+    static propTypes = {
+        blog: PropTypes.object.isRequired,
+        addLike: PropTypes.func.isRequired,
+        removeBlog: PropTypes.func.isRequired,
+        showDelete: PropTypes.bool.isRequired
     }
 
     handleClick = () => {
@@ -14,7 +22,7 @@ class Blog extends React.Component {
         const showWhenVisible = { display: this.props.showDelete ? '' : 'none' }
 
         const togglable = () => (
-                <Togglable ref={component => this.blogInfo = component} >
+                <Togglable ref={component => this.blogInfo = component}>
                     <div className="blogInfo">
                         <p>
                             <a href={this.props.blog.url}>{this.props.blog.url}</a>

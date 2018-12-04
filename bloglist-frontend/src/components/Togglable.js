@@ -7,6 +7,7 @@ class Togglable extends React.Component {
             visible: false
         }
     }
+    
   
     toggleVisibility = () => {
         this.setState({visible: !this.state.visible})
