@@ -12,14 +12,14 @@ class App extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-        blogs: [],
-        username: '',
-        password: '',
-        error: null,
-        user: null,
-        newTitle: '',
-        newUrl: '',
-        newAuthor: '',
+            blogs: [],
+            username: '',
+            password: '',
+            error: null,
+            user: null,
+            newTitle: '',
+            newUrl: '',
+            newAuthor: '',
         }
     }
 
@@ -34,6 +34,12 @@ class App extends React.Component {
             blogService.setToken(user.token)
         }
     } 
+
+    compareLikes = (a, b) => {
+        if(a.likes < b.likes) return 1
+        if(a.likes > b.likes) return -1
+        return 0
+    }
 
     handleFieldChange = (event) => {
         this.setState({ [event.target.name]: event.target.value })
@@ -90,71 +96,96 @@ class App extends React.Component {
             })  
     }
 
-    addLike = (id) => {
-        return () => {
-            const blog = this.state.blogs.find(b => b.id === id)
-            const changedBlog = { ...blog, likes: blog.likes+1 }
-      
-            blogService
-              .update(id, changedBlog)
-              .then(changedBlog => {
+    addLike = (id) => () => {
+        const blog = this.state.blogs.find(b => b.id === id)
+        const changedBlog = { ...blog, likes: blog.likes+1 }
+    
+        blogService
+            .update(id, changedBlog)
+            .then(changedBlog => {
                 this.setState({
-                  blogs: this.state.blogs.map(blog => blog.id !== id ? blog : changedBlog)
-                })
-              })
-              .catch(error => {
+                    blogs: this.state.blogs.map(blog => blog.id !== id ? blog : changedBlog)
+            })
+            })
+            .catch(error => {
                 this.setState({
-                  error: `blog '${blog.title}' has been removed from the server`,
-                  blogs: this.state.blogs.filter(b => b.id !== id)
-                })
-                setTimeout(() => {
-                  this.setState({ error: null })
-                }, 50000)
-              })
-          }
+                    error: `blog '${blog.title}' has been removed from the server`,
+                    blogs: this.state.blogs.filter(b => b.id !== id)
+            })
+            setTimeout(() => {
+                this.setState({ error: null })
+            }, 50000)
+        })
     }
 
-  render() {
-    if (this.state.user === null) {
+    removeBlog = (id) => () => {
+        if(window.confirm("are you sure you want to remove the blog?")) {
+            blogService
+                .remove(id)
+                .then(() => {
+                    blogService
+                        .getAll()
+                        .then(blogs => {
+                            this.setState({ blogs })
+                        })
+                } 
+            )
+        }
+    }
+
+    showDeleteForBlog = (blog) => {
+        if (!blog.user.username) { 
+            return true
+        }
+        if (blog.user.username === this.state.user.username) {
+            return true
+        }
+        return false
+    } 
+
+    render() {
+        if (this.state.user === null) {
+            return (
+                <div>
+                    <Notification message={this.state.error} />
+                    <Togglable buttonLabel="login">
+                        <LoginForm
+                            username={this.state.username}
+                            password={this.state.password}
+                            handleChange={this.handleFieldChange}
+                            handleSubmit={this.login}
+                        />
+                    </Togglable>
+                </div>
+            )
+        }
+  
         return (
-            <div>
-                <Notification message={this.state.error} />
-                <Togglable buttonLabel="login">
-                    <LoginForm
-                        username={this.state.username}
-                        password={this.state.password}
-                        handleChange={this.handleFieldChange}
-                        handleSubmit={this.login}
-                    />
-                </Togglable>
-            </div>
+        <div>
+            <Notification message={this.state.error} />
+            <p>{this.state.user.name} logged in <button onClick={this.logout}>logout</button></p>
+            <Togglable buttonLabel="add blog">
+                <BlogForm 
+                    addBlog={this.addBlog}
+                    handleChange={this.handleFieldChange}
+                    newTitle={this.state.newTitle}
+                    newAuthor={this.state.newAuthor}
+                    newUrl={this.state.newUrl}
+                />
+            </Togglable>
+            <h2>blogs</h2> 
+            {this.state.blogs.sort(this.compareLikes).map(blog => // sort blogs in descending order by likes
+                <Blog 
+                    key={blog.id} 
+                    blog={blog} 
+                    addLike={this.addLike(blog.id)}
+                    removeBlog={this.removeBlog(blog.id)}
+                    showDelete={this.showDeleteForBlog(blog)}
+                />
+            )}
+        </div>
         )
     }
-  
-    return (
-      <div>
-        <Notification message={this.state.error} />
-        <p>{this.state.user.name} logged in <button onClick={this.logout}>logout</button></p>
-        <Togglable buttonLabel="add blog">
-            <BlogForm 
-                addBlog={this.addBlog}
-                handleChange={this.handleFieldChange}
-                newTitle={this.state.newTitle}
-                newAuthor={this.state.newAuthor}
-                newUrl={this.state.newUrl}
-            />
-        </Togglable>
-        <h2>blogs</h2>
-        {this.state.blogs.map(blog =>
-            <Blog 
-                key={blog.id} 
-                blog={blog} 
-                addLike={this.addLike(blog.id)}
-            />
-        )}
-      </div>
-    )
-  }
 }
 
 export default App;

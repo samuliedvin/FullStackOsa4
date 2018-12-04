@@ -11,6 +11,7 @@ class Blog extends React.Component {
     }
 
     render() {
+        const showWhenVisible = { display: this.props.showDelete ? '' : 'none' }
 
         const togglable = () => (
                 <Togglable ref={component => this.blogInfo = component} >
@@ -20,6 +21,7 @@ class Blog extends React.Component {
                         </p>
                         <p>{this.props.blog.likes} likes <button onClick={this.props.addLike}>like</button></p>
                         <p>added by {!this.props.blog.user ? 'anonymous' : this.props.blog.user.name}</p>
+                        <button style={showWhenVisible} onClick={this.props.removeBlog}>delete blog</button>
                     </div>
                 </Togglable>
         )

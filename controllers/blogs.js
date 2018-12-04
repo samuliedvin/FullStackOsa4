@@ -56,6 +56,8 @@ blogsRouter.post('/', async (request, response) => {
         })
 
         const savedBlog = await blog.save()
+
+        console.log(savedBlog.populate('user', { username : 1, name: 1 }))
         
         user.blogs = user.blogs.concat(savedBlog._id)
         await user.save()
@@ -76,6 +78,10 @@ blogsRouter.delete('/:id', async (request, response) => {
         const userid = decodedToken.id
         const blog = await Blog.findById(request.params.id)
         console.log(blog.user, userid)
+        if(!blog.user) {
+            await blog.remove()
+            return response.status(204).end()  
+        } 
         if(blog.user.toString() !== userid.toString()) {
             return response.status(401).json({ error: 'invalid user' })
         }
