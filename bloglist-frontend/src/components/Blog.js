@@ -35,12 +35,14 @@ class Blog extends React.Component {
         )
         
         return(
-            <div className='blog' onClick={this.handleClick}>
-                <p>
-                    <strong>{this.props.blog.title}</strong> {this.props.blog.author}
-                </p>                
+            <div>
+                <div className='blog' onClick={this.handleClick}>
+                    <p>
+                        <strong>{this.props.blog.title}</strong> {this.props.blog.author}
+                    </p>                                    
+                </div>  
                 {togglable()}
-            </div>  
+            </div>
         )
     }
 }
