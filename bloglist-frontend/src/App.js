@@ -146,7 +146,7 @@ class App extends React.Component {
     render() {
         if (this.state.user === null) {
             return (
-                <div>
+                <div className="login">
                     <Notification message={this.state.error} />
                     <Togglable buttonLabel="login">
                         <LoginForm
