@@ -32,7 +32,6 @@ describe.only('<App />', () => {
         })
         it('all notes are rendered', () => {
             app.update()
-            console.log(window.localStorage)
             const blogs = app.find(Blog)
             const initialBlogs = blogService.blogs
             expect(blogs.length).toBe(initialBlogs.length)
